@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+    
+    <title>Uso de una API REST</title>
+
+    <style>
+      body{
+        background-color: cornflowerblue;
+      }
+      table thead {
+            background:#302b63;
+            color:white;
+        }
+    </style>
+</head>
+<body>
+  <div class="container mt-4 shadow-lg p-3 mb-5 bg-body rounded">
+    
+    <button type="button" class="btn btn-primary my-2" id="CuponCanje" data-bs-toggle="modal" data-bs-target="#CanjearCupon">Canjear Cupon</button>
+
+    <table class="table table-bordered table-striped" id ="cupones-table">
+      <thead>
+        <tr>
+          <th>Codigo Cupon</th>
+          <th>Estado del Cupon</th>
+          <th>Cantidad</th>
+          <th>Accion</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="modal fade" id="VerCuponModal" tabindex="-1" aria-labelledby="editarUsuarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editarUsuarioModalLabel">Cupon</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Agregue los campos del formulario de edición aquí -->
+          <div class="mb-3">
+            <label for="ID_Cupon" class="form-label">Codigo Cupon:</label>
+            <input type="text" class="form-control" id="ID_Cupon" name="ID_Cupon" readonly>
+          </div>
+          <div class="mb-3">
+            <label for="Estado_Cupon" class="form-label">Estado del Cupon:</label>
+            <input type="text" class="form-control" id="Estado_Cupon" name="Estado_Cupon" readonly>
+          </div>
+          <div class="mb-3">
+            <label for="Cantidad" class="form-label">Cantidad: </label>
+            <input type="text" class="form-control" id="Cantidad" name="Cantidad" readonly>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <!--<button type="button" class="btn btn-primary" id="guardar">Guardar cambios</button>-->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="CanjearCupon" tabindex="-1" aria-labelledby="editarUsuarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editarUsuarioModalLabel">Cupon</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Agregue los campos del formulario de edición aquí -->
+          <div class="mb-3">
+            <label for="ID_Cupon" class="form-label">Codigo Cupon:</label>
+            <input type="text" class="form-control" id="ID_Cupon" name="ID_Cupon">
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="guardar">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <script>
+
+        const cupontable = document.getElementById('cupones-table');
+        const cuponesTableBody = cupontable.getElementsByTagName('tbody')[0];
+
+        const Actualizar = CanjearCupon.querySelector('#guardar');
+        Actualizar.addEventListener("click", ActualizarCupon);
+
+  
+        let operacio = '';
+
+
+      let url = 'http://localhost:8000/api/Cupones/';
+      axios.get(url)
+            .then( response => response.data )
+            .then( cupones => {
+                for(const cupon of cupones) {
+
+                    const cuponRow = document.createElement('tr');
+
+                    const cuponIdCell = document.createElement('td');
+                    cuponIdCell.textContent = cupon.ID_Cupon;
+                    cuponRow.appendChild(cuponIdCell);
+
+                    const EstadoCell = document.createElement('td');
+                    EstadoCell.textContent = cupon.Estado_Cupon;
+                    cuponRow.appendChild(EstadoCell);
+
+                    const cantidadCell = document.createElement('td');
+                    cantidadCell.textContent = cupon.Cantidad;
+                    cuponRow.appendChild(cantidadCell);
+
+                   
+
+                    const actionCell = document.createElement('td');
+
+                    const VertButton = document.createElement('button');
+                    VertButton.textContent = 'Ver';
+                    VertButton.setAttribute("data-bs-target","#VerCuponModal");
+                    VertButton.setAttribute("data-bs-toggle","modal");
+                    VertButton.setAttribute("type","button");
+                    VertButton.setAttribute("class","btn btn-warning d-grid gap-2 col-6 mx-auto");
+                    VertButton.setAttribute("id","VerCupon")
+
+
+                    VertButton.addEventListener('click', () => {
+
+                        operacio = "editar";
+             
+                        // Obtener una referencia al modal
+                        const VerCuponModal = document.getElementById('VerCuponModal');
+
+                        const codigoCupon = VerCuponModal.querySelector('#ID_Cupon');
+                        const EstadoCupon = VerCuponModal.querySelector('#Estado_Cupon');
+                        const Cantidad = VerCuponModal.querySelector('#Cantidad');
+                        
+
+                        codigoCupon.value = cupon.ID_Cupon;
+                        EstadoCupon.value = cupon.Estado_Cupon;
+                        Cantidad.value = cupon.Cantidad;
+
+                        // Abrir el modal
+                        VerCuponModal.classList.add('show');
+                        VerCuponModal.style.display = 'block';
+
+                 
+                    });
+
+                    actionCell.appendChild(VertButton);
+
+                    cuponRow.appendChild(actionCell);
+
+                    cuponesTableBody.appendChild(cuponRow);
+
+                }
+                
+
+            })
+            .catch( error => console.log(error) )
+
+          
+            function ActualizarCupon(){
+                const CuponModal = document.getElementById('CanjearCupon');
+                const ID =  CuponModal.querySelector('#ID_Cupon');
+                const Estado = 'Canjeado';
+
+                let parametros = {ID_Cupon:ID.value, Estado_Cupon:Estado};
+
+                axios.put(url+ID.value, parametros)
+                .then(response => {
+                  console.log(response.data)
+                  if(response.data == 1){
+                    alert('Cupon canjeado')
+                    window.location.reload()
+                  }else{
+                    alert('Cupon ya se ha Canjeado')
+                    window.location.reload()
+                  }
+                    /*alert('Su Cupon se ha Canjeado');
+                    window.location.reload()  */
+                })
+                .catch( error => {
+                    alert('Hubo un error, intentelo de nuevo.');
+                    console.log(error)
+                 } )
+            }
+
+
+    </script>
+
+</body>
+</html>
+</html>
